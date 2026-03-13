@@ -1,0 +1,25 @@
+{
+  "name": "askill",
+  "version": "0.1.0",
+  "description": "CLI tool for managing agent skills - install, update, list, and remove skills from git repositories",
+  "type": "module",
+  "bin": {
+    "askill": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "js-yaml": "^4.1.0",
+    "simple-git": "^3.27.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.13.0",
+    "typescript": "^5.7.0"
+  },
+  "license": "MIT"
+}
