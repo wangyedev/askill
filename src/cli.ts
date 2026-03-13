@@ -10,7 +10,7 @@ import { configSetCommand, configGetCommand } from "./commands/config.js";
 const program = new Command();
 
 program
-  .name("askill")
+  .name("agskill")
   .description("Agent Skill Hub — install, update, list, and remove agent skills")
   .version("0.1.0");
 

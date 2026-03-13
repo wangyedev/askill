@@ -1,10 +1,27 @@
 {
-  "name": "askill",
+  "name": "agskill",
   "version": "0.1.0",
   "description": "CLI tool for managing agent skills - install, update, list, and remove skills from git repositories",
   "type": "module",
   "bin": {
-    "askill": "./dist/cli.js"
+    "agskill": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "agent",
+    "skills",
+    "cli",
+    "ai",
+    "claude",
+    "codex",
+    "gemini",
+    "cursor"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wangyedev/askill.git"
   },
   "scripts": {
     "build": "tsc",
