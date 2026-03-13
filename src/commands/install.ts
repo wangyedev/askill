@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import { ensureConfig, resolvePaths } from "../lib/config.js";
-import { parseSource, cloneToTemp, cloneToTempDefault, resolveCommitHash, cleanupTemp } from "../lib/git.js";
+import { parseSource, cloneToTemp, cloneToTempDefault, resolveCommitHash, resolveManifestSource, cleanupTemp } from "../lib/git.js";
 import { readSkillsYaml, writeSkillsYaml, readSkillsLock, writeSkillsLock, computeIntegrity, type LockEntry } from "../lib/manifest.js";
 import { copySkillDir, validateSkillMd, locateSkillInRepo, removeSkillDir } from "../lib/skills.js";
 
@@ -10,17 +10,28 @@ export async function installCommand(source: string | undefined, options: { glob
 
   // Bare install: restore all from lock
   if (!source) {
-    await bareInstall(config.client, paths, options);
+    await bareInstall(paths);
     return;
   }
 
   // Parse source and optional @version
   let rawSource = source;
   let version: string | undefined;
-  const atIdx = source.lastIndexOf("@");
-  if (atIdx > 0) {
-    rawSource = source.slice(0, atIdx);
-    version = source.slice(atIdx + 1);
+
+  if (source.startsWith("git@")) {
+    // For SSH URLs like git@host:owner/repo.git[@version]
+    // Only split on @ if there's a second one (the version delimiter)
+    const secondAt = source.indexOf("@", 4);
+    if (secondAt > 0) {
+      rawSource = source.slice(0, secondAt);
+      version = source.slice(secondAt + 1);
+    }
+  } else {
+    const atIdx = source.lastIndexOf("@");
+    if (atIdx > 0) {
+      rawSource = source.slice(0, atIdx);
+      version = source.slice(atIdx + 1);
+    }
   }
 
   const parsed = parseSource(rawSource, version);
@@ -84,9 +95,7 @@ export async function installCommand(source: string | undefined, options: { glob
 }
 
 async function bareInstall(
-  clientName: string,
-  paths: { skillsDir: string; manifestDir: string },
-  options: { global?: boolean }
+  paths: { skillsDir: string; manifestDir: string }
 ): Promise<void> {
   const lock = readSkillsLock(paths.manifestDir);
   const entries = Object.entries(lock);
@@ -111,20 +120,7 @@ async function installFromLock(
   entry: LockEntry,
   paths: { skillsDir: string; manifestDir: string }
 ): Promise<void> {
-  // Convert manifest source back to repo URL
-  const isLocal = entry.source.startsWith("/") || entry.source.startsWith("./") || entry.source.startsWith("../");
-  const isFullUrl = entry.source.startsWith("https://") || entry.source.startsWith("git@");
-  let repoUrl: string;
-  let subdirectory: string | null = null;
-
-  if (isLocal || isFullUrl) {
-    repoUrl = entry.source;
-  } else {
-    // GitHub shorthand stored as github.com/owner/repo[/subdir...]
-    const fullParts = entry.source.replace(/^github\.com\//, "").split("/");
-    repoUrl = `https://github.com/${fullParts[0]}/${fullParts[1]}.git`;
-    subdirectory = fullParts.length > 2 ? fullParts.slice(2).join("/") : null;
-  }
+  const { repoUrl, subdirectory } = resolveManifestSource(entry.source);
 
   let tmpDir: string;
   try {
@@ -139,6 +135,13 @@ async function installFromLock(
     const targetDir = path.join(paths.skillsDir, name);
     removeSkillDir(targetDir);
     copySkillDir(skillSourceDir, targetDir);
+
+    // Verify integrity against lock file
+    const integrity = computeIntegrity(targetDir);
+    if (entry.integrity && integrity !== entry.integrity) {
+      console.warn(`  Warning: integrity mismatch for ${name} (expected ${entry.integrity}, got ${integrity})`);
+    }
+
     console.log(`  Restored ${name} -> ${targetDir}`);
   } finally {
     cleanupTemp(tmpDir);

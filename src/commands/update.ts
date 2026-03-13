@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import { ensureConfig, resolvePaths } from "../lib/config.js";
-import { cloneToTempDefault, resolveCommitHash, cleanupTemp } from "../lib/git.js";
+import { cloneToTempDefault, resolveCommitHash, resolveManifestSource, cleanupTemp } from "../lib/git.js";
 import { readSkillsYaml, readSkillsLock, writeSkillsLock, computeIntegrity } from "../lib/manifest.js";
 import { copySkillDir, locateSkillInRepo, removeSkillDir } from "../lib/skills.js";
 
@@ -39,18 +39,7 @@ export async function updateCommand(skillName: string | undefined, options: { al
 
     console.log(`Checking ${name}...`);
 
-    const isLocal = intent.source.startsWith("/") || intent.source.startsWith("./") || intent.source.startsWith("../");
-    const isFullUrl = intent.source.startsWith("https://") || intent.source.startsWith("git@");
-    let repoUrl: string;
-    let subdirectory: string | null = null;
-
-    if (isLocal || isFullUrl) {
-      repoUrl = intent.source;
-    } else {
-      const fullParts = intent.source.replace(/^github\.com\//, "").split("/");
-      repoUrl = `https://github.com/${fullParts[0]}/${fullParts[1]}.git`;
-      subdirectory = fullParts.length > 2 ? fullParts.slice(2).join("/") : null;
-    }
+    const { repoUrl, subdirectory } = resolveManifestSource(intent.source);
 
     let tmpDir: string;
     try {

@@ -45,16 +45,26 @@ export function parseSource(source: string, version?: string): ParsedSource {
 
 export async function cloneToTemp(repoUrl: string, ref: string): Promise<string> {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "askill-"));
-  const git: SimpleGit = simpleGit();
-  await git.clone(repoUrl, tmpDir, ["--depth", "1", "--branch", ref]);
-  return tmpDir;
+  try {
+    const git: SimpleGit = simpleGit();
+    await git.clone(repoUrl, tmpDir, ["--depth", "1", "--branch", ref]);
+    return tmpDir;
+  } catch (err) {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    throw err;
+  }
 }
 
 export async function cloneToTempDefault(repoUrl: string): Promise<string> {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "askill-"));
-  const git: SimpleGit = simpleGit();
-  await git.clone(repoUrl, tmpDir, ["--depth", "1"]);
-  return tmpDir;
+  try {
+    const git: SimpleGit = simpleGit();
+    await git.clone(repoUrl, tmpDir, ["--depth", "1"]);
+    return tmpDir;
+  } catch (err) {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    throw err;
+  }
 }
 
 export async function resolveCommitHash(repoDir: string): Promise<string> {
@@ -63,22 +73,18 @@ export async function resolveCommitHash(repoDir: string): Promise<string> {
   return log.latest?.hash ?? "unknown";
 }
 
-export async function fetchAndUpdate(repoDir: string, ref: string): Promise<{ hash: string; updated: boolean }> {
-  const git: SimpleGit = simpleGit(repoDir);
-  const oldHash = (await git.log({ maxCount: 1 })).latest?.hash ?? "";
+export function resolveManifestSource(source: string): { repoUrl: string; subdirectory: string | null } {
+  const isLocal = source.startsWith("/") || source.startsWith("./") || source.startsWith("../");
+  const isFullUrl = source.startsWith("https://") || source.startsWith("git@");
 
-  await git.fetch("origin", ref);
-
-  try {
-    await git.checkout(ref);
-    await git.pull("origin", ref);
-  } catch {
-    // If ref is a tag, just checkout
-    await git.checkout(`origin/${ref}`).catch(() => git.checkout(ref));
+  if (isLocal || isFullUrl) {
+    return { repoUrl: source, subdirectory: null };
   }
 
-  const newHash = (await git.log({ maxCount: 1 })).latest?.hash ?? "";
-  return { hash: newHash, updated: oldHash !== newHash };
+  const parts = source.replace(/^github\.com\//, "").split("/");
+  const repoUrl = `https://github.com/${parts[0]}/${parts[1]}.git`;
+  const subdirectory = parts.length > 2 ? parts.slice(2).join("/") : null;
+  return { repoUrl, subdirectory };
 }
 
 export function cleanupTemp(tmpDir: string): void {

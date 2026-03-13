@@ -3,13 +3,11 @@ import { getClient, getClientNames } from "../lib/clients.js";
 
 export function configSetCommand(key: string, value: string): void {
   if (key !== "client") {
-    console.error(`Unknown config key: "${key}". Available keys: client`);
-    process.exit(1);
+    throw new Error(`Unknown config key: "${key}". Available keys: client`);
   }
 
   if (!getClient(value)) {
-    console.error(`Unknown client: "${value}". Available: ${getClientNames().join(", ")}`);
-    process.exit(1);
+    throw new Error(`Unknown client: "${value}". Available: ${getClientNames().join(", ")}`);
   }
 
   const config = readConfig() ?? { client: "" };
@@ -28,7 +26,6 @@ export function configGetCommand(key: string): void {
   if (key === "client") {
     console.log(config.client);
   } else {
-    console.error(`Unknown config key: "${key}". Available keys: client`);
-    process.exit(1);
+    throw new Error(`Unknown config key: "${key}". Available keys: client`);
   }
 }
