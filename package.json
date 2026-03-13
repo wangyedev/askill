@@ -21,7 +21,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wangyedev/askill.git"
+    "url": "git+https://github.com/wangyedev/agskill.git"
   },
   "scripts": {
     "build": "tsc",

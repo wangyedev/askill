@@ -69,7 +69,7 @@ program
 
 const configCmd = program
   .command("config")
-  .description("Manage askill configuration");
+  .description("Manage agskill configuration");
 
 configCmd
   .command("set <key> <value>")

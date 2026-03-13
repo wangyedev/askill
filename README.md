@@ -1,82 +1,82 @@
-# askill
+# agskill
 
 CLI tool for managing agent skills — install, update, list, and remove skills from git repositories.
 
-Skills are the open format for giving AI agents new capabilities ([agentskills.io](https://agentskills.io)). `askill` handles the lifecycle: installing, updating, and removing skills so you don't have to manage files manually.
+Skills are the open format for giving AI agents new capabilities ([agentskills.io](https://agentskills.io)). `agskill` handles the lifecycle: installing, updating, and removing skills so you don't have to manage files manually.
 
 ## Install
 
 ```bash
-npm install -g askill
+npm install -g agskill
 ```
 
 ## Quick Start
 
 ```bash
 # First run auto-detects your agent client (Claude Code, Codex, Gemini CLI, Cursor)
-askill install anthropics/skills/superpowers
+agskill install anthropics/skills/superpowers
 
 # List installed skills
-askill list
+agskill list
 
 # Update all skills
-askill update --all
+agskill update --all
 
 # Remove a skill
-askill remove superpowers
+agskill remove superpowers
 ```
 
 ## Commands
 
-### `askill install [source[@version]] [--global]`
+### `agskill install [source[@version]] [--global]`
 
 Install a skill from a git repository.
 
 ```bash
 # GitHub shorthand
-askill install anthropics/skills/superpowers
+agskill install anthropics/skills/superpowers
 
 # Pin to a branch or tag
-askill install anthropics/skills/superpowers@v5.x
+agskill install anthropics/skills/superpowers@v5.x
 
 # Full git URL
-askill install https://github.com/myorg/my-skill.git
+agskill install https://github.com/myorg/my-skill.git
 
 # Global install (shared across projects)
-askill install anthropics/skills/superpowers --global
+agskill install anthropics/skills/superpowers --global
 
 # Restore all skills from lock file
-askill install
+agskill install
 ```
 
-### `askill update [skill-name | --all] [--global]`
+### `agskill update [skill-name | --all] [--global]`
 
 Update skills to the latest version matching their ref constraint.
 
 ```bash
-askill update superpowers
-askill update --all
+agskill update superpowers
+agskill update --all
 ```
 
-### `askill list [--global]`
+### `agskill list [--global]`
 
 Display installed skills with name, version, and source.
 
-### `askill remove <skill-name> [--global]`
+### `agskill remove <skill-name> [--global]`
 
 Remove an installed skill and clean up manifest entries.
 
-### `askill config set <key> <value>`
+### `agskill config set <key> <value>`
 
 Configure the agent client. Supported clients: `claude-code`, `codex`, `gemini-cli`, `cursor`.
 
 ```bash
-askill config set client claude-code
+agskill config set client claude-code
 ```
 
 ## How It Works
 
-`askill` uses a two-file manifest system (like npm, Cargo, Poetry):
+`agskill` uses a two-file manifest system (like npm, Cargo, Poetry):
 
 - **`skills.yaml`** — human-editable intent (source + version constraint)
 - **`skills.lock`** — machine-generated pins (commit hash + integrity hash)
@@ -101,7 +101,7 @@ Both files live in your client's config directory (e.g., `.claude/` for Claude C
 
 ## Companion Skill
 
-`askill` ships with a companion skill (`skill-hub/SKILL.md`) that lets your agent manage skills conversationally:
+`agskill` ships with a companion skill (`skill-hub/SKILL.md`) that lets your agent manage skills conversationally:
 
 > "Install the superpowers skill"
 > "What skills do I have?"

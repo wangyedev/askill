@@ -44,7 +44,7 @@ export function parseSource(source: string, version?: string): ParsedSource {
 }
 
 export async function cloneToTemp(repoUrl: string, ref: string): Promise<string> {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "askill-"));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agskill-"));
   try {
     const git: SimpleGit = simpleGit();
     await git.clone(repoUrl, tmpDir, ["--depth", "1", "--branch", ref]);
@@ -56,7 +56,7 @@ export async function cloneToTemp(repoUrl: string, ref: string): Promise<string>
 }
 
 export async function cloneToTempDefault(repoUrl: string): Promise<string> {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "askill-"));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agskill-"));
   try {
     const git: SimpleGit = simpleGit();
     await git.clone(repoUrl, tmpDir, ["--depth", "1"]);

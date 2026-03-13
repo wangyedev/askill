@@ -5,20 +5,20 @@ import * as yaml from "js-yaml";
 import * as readline from "node:readline";
 import { CLIENT_REGISTRY, getClient, getClientNames, type ClientConfig } from "./clients.js";
 
-const CONFIG_DIR = path.join(os.homedir(), ".config", "askill");
+const CONFIG_DIR = path.join(os.homedir(), ".config", "agskill");
 const CONFIG_FILE = path.join(CONFIG_DIR, "config.yaml");
 
-export interface AskillConfig {
+export interface AgskillConfig {
   client: string;
 }
 
-export function readConfig(): AskillConfig | null {
+export function readConfig(): AgskillConfig | null {
   if (!fs.existsSync(CONFIG_FILE)) return null;
   const content = fs.readFileSync(CONFIG_FILE, "utf-8");
-  return yaml.load(content) as AskillConfig;
+  return yaml.load(content) as AgskillConfig;
 }
 
-export function writeConfig(config: AskillConfig): void {
+export function writeConfig(config: AgskillConfig): void {
   fs.mkdirSync(CONFIG_DIR, { recursive: true });
   fs.writeFileSync(CONFIG_FILE, yaml.dump(config), "utf-8");
 }
@@ -76,7 +76,7 @@ function prompt(question: string): Promise<string> {
   });
 }
 
-export async function ensureConfig(): Promise<AskillConfig> {
+export async function ensureConfig(): Promise<AgskillConfig> {
   const existing = readConfig();
   if (existing?.client) return existing;
 
@@ -88,7 +88,7 @@ export async function ensureConfig(): Promise<AskillConfig> {
       `Detected ${clientConfig.name}. Use ${clientConfig.name} paths? [Y/n] `
     );
     if (answer === "" || answer.toLowerCase() === "y") {
-      const config: AskillConfig = { client: autoDetected };
+      const config: AgskillConfig = { client: autoDetected };
       writeConfig(config);
       console.log(`Saved client config: ${autoDetected}`);
       return config;
@@ -108,7 +108,7 @@ export async function ensureConfig(): Promise<AskillConfig> {
     throw new Error("Invalid selection");
   }
 
-  const config: AskillConfig = { client: clients[idx] };
+  const config: AgskillConfig = { client: clients[idx] };
   writeConfig(config);
   console.log(`Saved client config: ${clients[idx]}`);
   return config;

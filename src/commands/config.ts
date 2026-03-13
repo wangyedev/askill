@@ -19,7 +19,7 @@ export function configSetCommand(key: string, value: string): void {
 export function configGetCommand(key: string): void {
   const config = readConfig();
   if (!config) {
-    console.log("No configuration found. Run any askill command to set up.");
+    console.log("No configuration found. Run any agskill command to set up.");
     return;
   }
 
